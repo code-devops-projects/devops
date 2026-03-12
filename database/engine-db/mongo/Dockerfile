@@ -1,3 +1,0 @@
-FROM mongo:8.0
-
-ENV LANG=C.UTF-8

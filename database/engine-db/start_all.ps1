@@ -1,45 +1,37 @@
-# *******************************************************************************
-# *                             INICIO AUTOMÁTICO                               *
-# *******************************************************************************
+# =============================================================================
+# Database Containers Start Script
+# =============================================================================
+# Description: Create all database containers without starting them
+# Usage: .\start_all.ps1 [-AutoStart]
+# =============================================================================
 
-# # PostgreSQL
-# docker-compose -p databases -f ./postgres/docker-compose.yml up -d
+param(
+    [switch]$AutoStart
+)
 
-# # MySQL
-# docker-compose -p databases -f ./mysql/docker-compose.yml up -d
+$project = "databases"
+$services = @(
+    @{ Name = "PostgreSQL"; Path = "./postgres/docker-compose.yml" },
+    @{ Name = "MySQL";      Path = "./mysql/docker-compose.yml" },
+    @{ Name = "MongoDB";    Path = "./mongo/docker-compose.yml" },
+    @{ Name = "SQL Server"; Path = "./sqlserver/docker-compose.yml" },
+    @{ Name = "Cassandra";  Path = "./casandra/docker-compose.yml" },
+    @{ Name = "SQLite";     Path = "./sqlite/docker-compose.yml" }
+)
 
-# # MongoDB
-# docker-compose -p databases -f ./mongo/docker-compose.yml up -d
-
-# # SQL Server
-# docker-compose -p databases -f ./sqlserver/docker-compose.yml up -d
-
-# # Cassandra
-# docker-compose -p databases -f ./cassandra/docker-compose.yml up -d
-
-# # SQLite
-# docker-compose -p databases -f ./sqlite/docker-compose.yml up -d
-
-
-# *******************************************************************************
-# *                             INICIO MANUAL                                   *
-# *******************************************************************************
-
-# PostgreSQL
-docker-compose -p databases -f ./postgres/docker-compose.yml up --no-start
-
-# MySQL
-docker-compose -p databases -f ./mysql/docker-compose.yml up --no-start
-
-# MongoDB
-docker-compose -p databases -f ./mongo/docker-compose.yml up --no-start
-
-# SQL Server
-docker-compose -p databases -f ./sqlserver/docker-compose.yml up --no-start
-
-# Cassandra
-docker-compose -p databases -f ./cassandra/docker-compose.yml up --no-start
-
-# SQLite
-docker-compose -p databases -f ./sqlite/docker-compose.yml up --no-start
+if ($AutoStart) {
+    Write-Host "Starting all database containers..." -ForegroundColor Green
+    foreach ($svc in $services) {
+        Write-Host "  Starting $($svc.Name)..." -ForegroundColor Cyan
+        docker compose -p $project -f $svc.Path up -d
+    }
+    Write-Host "All databases started." -ForegroundColor Green
+} else {
+    Write-Host "Creating database containers (not started)..." -ForegroundColor Yellow
+    foreach ($svc in $services) {
+        Write-Host "  Creating $($svc.Name)..." -ForegroundColor Cyan
+        docker compose -p $project -f $svc.Path up --no-start
+    }
+    Write-Host "All containers created. Start them individually with: docker start <container-name>" -ForegroundColor Green
+}
 

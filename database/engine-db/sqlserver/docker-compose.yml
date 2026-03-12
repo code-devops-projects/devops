@@ -3,6 +3,7 @@ services:
     container_name: db-sqlserver
     image: mcr.microsoft.com/mssql/server:2022-latest
     restart: unless-stopped
+    env_file: .env
     environment:
       SA_PASSWORD: ${SA_PASSWORD}
       ACCEPT_EULA: "Y"
@@ -15,11 +16,22 @@ services:
       - sqlserver_data:/var/opt/mssql
       - ./backups:/backups
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -U sa -P ${SA_PASSWORD} -Q 'SELECT 1' || exit 1"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -U sa -P \"$$SA_PASSWORD\" -Q 'SELECT 1' -b -o /dev/null"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 30s
+      retries: 5
+      start_period: 40s
+    stop_grace_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2.0"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   sqlserver_data:

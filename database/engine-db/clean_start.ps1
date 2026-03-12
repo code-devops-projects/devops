@@ -1,15 +1,28 @@
 # =============================================================================
 # Clean and Start All Databases Script
 # =============================================================================
-# Description: Clean all containers and volumes, then start fresh
+# Description: Clean ONLY database containers and their volumes, then start fresh
+#              Does NOT affect other Docker resources outside this project.
 # Usage: .\clean_start.ps1
 # =============================================================================
+
+$project = "databases"
+$containers = @("db-postgres", "db-mysql", "db-mongo", "db-sqlserver", "db-cassandra", "db-sqlite")
+$services = @(
+    @{ Name = "PostgreSQL"; Path = "./postgres/docker-compose.yml" },
+    @{ Name = "MySQL";      Path = "./mysql/docker-compose.yml" },
+    @{ Name = "MongoDB";    Path = "./mongo/docker-compose.yml" },
+    @{ Name = "SQL Server"; Path = "./sqlserver/docker-compose.yml" },
+    @{ Name = "Cassandra";  Path = "./casandra/docker-compose.yml" },
+    @{ Name = "SQLite";     Path = "./sqlite/docker-compose.yml" }
+)
 
 Write-Host "==============================================================================" -ForegroundColor Cyan
 Write-Host "  CLEANING AND STARTING ALL DATABASES" -ForegroundColor Cyan
 Write-Host "==============================================================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "⚠️  WARNING: This will DELETE ALL DATABASE DATA!" -ForegroundColor Red
+Write-Host "WARNING: This will DELETE ALL DATABASE DATA for this project only." -ForegroundColor Red
+Write-Host "Other Docker containers, images and volumes will NOT be affected." -ForegroundColor Yellow
 Write-Host ""
 $confirmation = Read-Host "Are you sure you want to continue? (yes/no)"
 
@@ -19,45 +32,27 @@ if ($confirmation -ne 'yes') {
 }
 
 Write-Host ""
-Write-Host "Step 1: Stopping all database containers..." -ForegroundColor Yellow
-docker-compose -p databases -f ./postgres/docker-compose.yml down -v 2>$null
-docker-compose -p databases -f ./mysql/docker-compose.yml down -v 2>$null
-docker-compose -p databases -f ./mongo/docker-compose.yml down -v 2>$null
-docker-compose -p databases -f ./sqlserver/docker-compose.yml down -v 2>$null
-docker-compose -p databases -f ./cassandra/docker-compose.yml down -v 2>$null
-docker-compose -p databases -f ./sqlite/docker-compose.yml down -v 2>$null
+Write-Host "Step 1: Stopping containers and removing volumes..." -ForegroundColor Yellow
+foreach ($svc in $services) {
+    Write-Host "  Cleaning $($svc.Name)..." -ForegroundColor Cyan
+    docker compose -p $project -f $svc.Path down -v 2>$null
+}
 
 Write-Host ""
-Write-Host "Step 2: Removing old containers..." -ForegroundColor Yellow
-docker rm -f db-postgres db-mysql db-mongo db-sqlserver db-cassandra db-sqlite 2>$null
-docker rm -f serve-postgres serve-mysql serve-mongo serve-sqlserver serve-cassandra serve-sqlite 2>$null
+Write-Host "Step 2: Removing remaining containers (if any)..." -ForegroundColor Yellow
+foreach ($c in $containers) {
+    docker rm -f $c 2>$null
+}
 
 Write-Host ""
-Write-Host "Step 3: Removing old volumes..." -ForegroundColor Yellow
-docker volume rm mysql_mysql_data 2>$null
-docker volume rm postgres_postgres_data 2>$null
-docker volume rm mongo_mongo_data 2>$null
-docker volume rm sqlserver_sqlserver_data 2>$null
-docker volume rm cassandra_cassandra_data 2>$null
-docker volume rm sqlite_sqlite_data 2>$null
+Write-Host "Step 3: Starting all databases with fresh data..." -ForegroundColor Green
+foreach ($svc in $services) {
+    Write-Host "  Starting $($svc.Name)..." -ForegroundColor Cyan
+    docker compose -p $project -f $svc.Path up -d
+}
 
 Write-Host ""
-Write-Host "Step 4: Cleaning unused Docker resources..." -ForegroundColor Yellow
-docker system prune -f
-
-Write-Host ""
-Write-Host "Step 5: Starting all databases with fresh data..." -ForegroundColor Green
-docker-compose -p databases -f ./postgres/docker-compose.yml up -d
-docker-compose -p databases -f ./mysql/docker-compose.yml up -d
-docker-compose -p databases -f ./mongo/docker-compose.yml up -d
-docker-compose -p databases -f ./sqlserver/docker-compose.yml up -d
-docker-compose -p databases -f ./cassandra/docker-compose.yml up -d
-docker-compose -p databases -f ./sqlite/docker-compose.yml up -d
-
-Write-Host ""
-Write-Host "✅ All databases started successfully!" -ForegroundColor Green
-Write-Host ""
-Write-Host "Waiting for databases to be ready (30 seconds)..." -ForegroundColor Cyan
+Write-Host "Waiting for databases to be ready..." -ForegroundColor Cyan
 Start-Sleep -Seconds 30
 
 Write-Host ""
@@ -66,7 +61,7 @@ docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" --filter "name=db
 
 Write-Host ""
 Write-Host "==============================================================================" -ForegroundColor Cyan
-Write-Host "  DATABASES READY!" -ForegroundColor Green
+Write-Host "  DATABASES READY" -ForegroundColor Green
 Write-Host "==============================================================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Available databases:" -ForegroundColor White
