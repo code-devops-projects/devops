@@ -1,0 +1,13 @@
+@startuml automation_flow
+!theme spacelab
+actor User
+User -> "init-project" : Inicializa proyecto
+"init-project" -> "config .env" : Propaga nombre/config
+"init-project" -> "sync-config" : Sincroniza variables
+"sync-config" -> "Ambientes .env" : Actualiza ambientes
+User -> "manage" : Gestiona servicios (up/down/logs)
+"manage" -> "Docker Compose" : Ejecuta acción
+"Docker Compose" -> "Postgres Container" : Levanta/gestiona contenedor
+note right of User : El usuario inicia y gestiona el ciclo completo
+note right of "sync-config" : Sincroniza variables en todos los ambientes
+@enduml

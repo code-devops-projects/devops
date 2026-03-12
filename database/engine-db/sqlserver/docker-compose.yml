@@ -1,0 +1,32 @@
+services:
+  sqlserver:
+    container_name: db-sqlserver
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      SA_PASSWORD: ${SA_PASSWORD}
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    networks:
+      - db-network
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -U sa -P ${SA_PASSWORD} -Q 'SELECT 1' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  sqlserver_data:
+    driver: local
+
+networks:
+  db-network:
+    driver: bridge
+    name: db-network
+

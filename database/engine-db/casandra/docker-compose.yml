@@ -1,0 +1,32 @@
+services:
+  cassandra:
+    container_name: db-cassandra
+    image: cassandra:5.0
+    restart: unless-stopped
+    environment:
+      CASSANDRA_CLUSTER_NAME: "DevCluster"
+      CASSANDRA_DC: "DC1"
+      CASSANDRA_RACK: "Rack1"
+      CASSANDRA_ENDPOINT_SNITCH: "GossipingPropertyFileSnitch"
+    ports:
+      - "9042:9042"
+    networks:
+      - db-network
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "nodetool status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  cassandra_data:
+    driver: local
+
+networks:
+  db-network:
+    driver: bridge
+    name: db-network

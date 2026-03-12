@@ -1,0 +1,15 @@
+databaseChangeLog:
+  # Example changeset for trigger
+  - changeSet:
+      id: a7b8c9d0-e1f2-4a3b-4c5d-6e7f8a9b0c1d
+      author: your.email@company.com
+      context: project_name
+      labels: TICKET-007
+      comment: Create trigger for audit logging
+      changes:
+        - tagDatabase:
+            tag: v1.5.0
+        - sqlFile:
+            path: 06_triggers\00001_tr_example_trigger.sql
+            endDelimiter:  \nGO
+            stripComments: false

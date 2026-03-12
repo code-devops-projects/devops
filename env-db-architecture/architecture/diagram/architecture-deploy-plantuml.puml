@@ -1,0 +1,16 @@
+@startuml deploy_architecture
+!theme spacelab
+actor Dev as "DevOps/User"
+node "Local Machine" {
+  folder "Project (inventory/penalty/security)" {
+    [manage.ps1] --> [Docker Compose]
+    [sync-config.ps1] --> [.env files]
+    [init-project.ps1] --> [environments/config/.env]
+    [Docker Compose] --> [Postgres Container]
+    [Postgres Container] --> [Volume]
+    [Postgres Container] --> [Network]
+    [Postgres Container] --> [Backups]
+  }
+}
+Dev --> [manage.ps1]
+@enduml

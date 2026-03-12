@@ -1,0 +1,33 @@
+databaseChangeLog:
+  # Example changeset for table creation
+  - changeSet:
+      id: a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+      author: your.email@company.com
+      context: project_name
+      labels: TICKET-001
+      comment: Create example table
+      changes:
+        - tagDatabase:
+            tag: v1.0.0
+        - sqlFile:
+            path: 01_tables\00001_example_table.sql
+            endDelimiter:  \nGO
+            stripComments: false
+      rollback:
+        - sqlFile:
+            path: 11_rollbacks\01_tables\00001_example_table_rollback.sql
+  
+  # Example changeset for alter table
+  - changeSet:
+      id: b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e
+      author: your.email@company.com
+      context: project_name
+      labels: TICKET-002
+      comment: Add column to example table
+      changes:
+        - tagDatabase:
+            tag: v1.0.1
+        - sqlFile:
+            path: 01_tables\00002_alter_example_table.sql
+            endDelimiter:  \nGO
+            stripComments: false

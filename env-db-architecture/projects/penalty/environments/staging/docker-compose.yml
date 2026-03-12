@@ -1,0 +1,41 @@
+services:
+  # ==================== STAGING ====================
+  postgres-staging:
+    container_name: ${PROJECT_NAME}-postgres-staging
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${PROJECT_NAME}_${DB_NAME_BASE}_staging
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${PORT_STAGING}:5432"
+    networks:
+      - network_staging
+    volumes:
+      - postgres_data_staging:/var/lib/postgresql/data
+      - ../../backups/staging:/backups/postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    labels:
+      - com.${PROJECT_NAME}.group=${PROJECT_NAME}
+      - com.${PROJECT_NAME}.environment=staging
+
+# ==================== VOLÚMENES ====================
+volumes:
+  postgres_data_staging:
+    driver: local
+    name: ${PROJECT_NAME}_${VOLUME_PREFIX}_staging
+
+# ==================== REDES ====================
+networks:
+  network_staging:
+    driver: bridge
+    name: ${PROJECT_NAME}_${NETWORK_PREFIX}_staging

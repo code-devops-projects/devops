@@ -1,0 +1,18 @@
+# Archivos de entorno con credenciales sensibles
+.env
+.env.*
+environments/*/.env
+
+# Backups de bases de datos
+backups/
+*.sql
+*.tar.gz
+postgres_data_*_backup.*
+
+# Archivos de log
+*.log
+
+# Archivos temporales
+*.tmp
+*.swp
+*~

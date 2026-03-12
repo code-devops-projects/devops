@@ -1,0 +1,21 @@
+services:
+  sqlite:
+    container_name: db-sqlite
+    image: nouchka/sqlite3:latest
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    volumes:
+      - sqlite_data:/data
+      - ./backups:/backups
+    networks:
+      - db-network
+
+volumes:
+  sqlite_data:
+    driver: local
+
+networks:
+  db-network:
+    driver: bridge
+    name: db-network

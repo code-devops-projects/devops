@@ -1,0 +1,39 @@
+services:
+  # ==================== PRODUCCIÓN ====================
+  postgres-prod:
+    container_name: ${PROJECT_NAME}-postgres-prod
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${PROJECT_NAME}_${DB_NAME_BASE}_prod
+    ports:
+      - "${PORT_PROD}:5432"
+    networks:
+      - network_prod
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ../../backups/prod:/backups/postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    labels:
+      - com.${PROJECT_NAME}.group=${PROJECT_NAME}
+      - com.${PROJECT_NAME}.environment=prod
+
+# ==================== VOLÚMENES ====================
+volumes:
+  postgres_data_prod:
+    driver: local
+    name: ${PROJECT_NAME}_${VOLUME_PREFIX}_prod
+
+# ==================== REDES ====================
+networks:
+  network_prod:
+    driver: bridge
+    name: ${PROJECT_NAME}_${NETWORK_PREFIX}_prod

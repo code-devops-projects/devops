@@ -1,41 +1,195 @@
-version: '3.8'
-
 services:
   kong:
     build: .
     container_name: kong
     ports:
-      - "9000:8000"  # Puerto para las API proxy
-      - "8443:8443"  # Puerto para las API proxy (HTTPS)
-      - "8001:8001"  # Puerto para la API administrativa
-      - "8002:8002"  # Puerto para Kong Manager (HTTP)
-      - "8445:8445"  # Puerto para Kong Manager (HTTPS)
+      - "80:8000"       # Proxy HTTP - Frontends (portal/app)
+      - "8090:8000"     # Proxy HTTP - Backend APIs
+      - "8001:8001"     # Admin API
+      - "8002:8002"     # Kong Manager (HTTP)
+      - "8443:8443"     # Proxy HTTPS
+      - "8445:8445"     # Kong Manager HTTPS
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: "/usr/local/kong/declarative/kong.yml"
+      KONG_PROXY_LISTEN: "0.0.0.0:8000, 0.0.0.0:8443 ssl"
       KONG_ADMIN_LISTEN: "0.0.0.0:8001, 0.0.0.0:8445 ssl"
       KONG_ADMIN_GUI_LISTEN: "0.0.0.0:8002, 0.0.0.0:8445 ssl"
-      KONG_PROXY_LISTEN: "0.0.0.0:8000, 0.0.0.0:8443 ssl"
-      KONG_LOG_LEVEL: debug
+      KONG_LOG_LEVEL: info
+    volumes:
+      - ./kong.yml:/usr/local/kong/declarative/kong.yml:ro
     networks:
-      - network_local_server
+      - gateway_net
 
-  backend_security:
-    image: devops-backend-security:latest
-    container_name: backend-security
+  mock-customer-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-customer-portal
+    environment:
+      - SERVICE_NAME=customer-portal
+      - PORT=80
+    ports:
+      - "3001:80"
+    networks:
+      - gateway_net
+
+  mock-security-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-security-portal
+    environment:
+      - SERVICE_NAME=security-portal
+      - PORT=80
+    ports:
+      - "3002:80"
+    networks:
+      - gateway_net
+
+  mock-inventory-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-inventory-portal
+    environment:
+      - SERVICE_NAME=inventory-portal
+      - PORT=80
+    ports:
+      - "4201:80"
+    networks:
+      - gateway_net
+
+  mock-invoice-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-invoice-portal
+    environment:
+      - SERVICE_NAME=invoice-portal
+      - PORT=80
+    ports:
+      - "4202:80"
+    networks:
+      - gateway_net
+
+  mock-customer-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-customer-app
+    environment:
+      - SERVICE_NAME=customer-app
+      - PORT=8100
+    ports:
+      - "8101:8100"
+    networks:
+      - gateway_net
+
+  mock-security-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-security-app
+    environment:
+      - SERVICE_NAME=security-app
+      - PORT=8100
+    ports:
+      - "8102:8100"
+    networks:
+      - gateway_net
+
+  mock-inventory-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-inventory-app
+    environment:
+      - SERVICE_NAME=inventory-app
+      - PORT=8081
+    ports:
+      - "8082:8081"
+    networks:
+      - gateway_net
+
+  mock-invoice-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-invoice-app
+    environment:
+      - SERVICE_NAME=invoice-app
+      - PORT=9100
+    ports:
+      - "9101:9100"
+    networks:
+      - gateway_net
+
+  mock-customer-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-customer-api
+    environment:
+      - SERVICE_NAME=customer-api
+      - PORT=5000
+    ports:
+      - "5001:5000"
+    networks:
+      - gateway_net
+
+  mock-security-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-security-api
+    environment:
+      - SERVICE_NAME=security-api
+      - PORT=5000
+    ports:
+      - "5002:5000"
+    networks:
+      - gateway_net
+
+  mock-inventory-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-inventory-api
+    environment:
+      - SERVICE_NAME=inventory-api
+      - PORT=5000
+    ports:
+      - "5003:5000"
+    networks:
+      - gateway_net
+
+  mock-invoice-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-invoice-api
+    environment:
+      - SERVICE_NAME=invoice-api
+      - PORT=9000
     ports:
       - "9001:9000"
     networks:
-      - network_local_server
+      - gateway_net
 
-  backend_ubication:
-    image: devops-backend-ubication:latest
-    container_name: backend-ubication
+  mock-fallback:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-fallback
+    environment:
+      - SERVICE_NAME=fallback
+      - PORT=8080
     ports:
-      - "9002:9000"
+      - "5999:8080"
     networks:
-      - network_local_server
+      - gateway_net
 
 networks:
-  network_local_server:
-    external: true
+  gateway_net:
+    driver: bridge

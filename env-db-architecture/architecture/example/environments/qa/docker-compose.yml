@@ -1,0 +1,39 @@
+services:
+  # ==================== QA ====================
+  postgres-qa:
+    container_name: ${PROJECT_NAME}-postgres-qa
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${PROJECT_NAME}_${DB_NAME_BASE}_qa
+    ports:
+      - "${PORT_QA}:5432"
+    networks:
+      - network_qa
+    volumes:
+      - postgres_data_qa:/var/lib/postgresql/data
+      - ../../backups/qa:/backups/postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    labels:
+      - com.${PROJECT_NAME}.group=${PROJECT_NAME}
+      - com.${PROJECT_NAME}.environment=qa
+
+# ==================== VOLÚMENES ====================
+volumes:
+  postgres_data_qa:
+    driver: local
+    name: ${PROJECT_NAME}_${VOLUME_PREFIX}_qa
+
+# ==================== REDES ====================
+networks:
+  network_qa:
+    driver: bridge
+    name: ${PROJECT_NAME}_${NETWORK_PREFIX}_qa

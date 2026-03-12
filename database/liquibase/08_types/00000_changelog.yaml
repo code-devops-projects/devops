@@ -1,0 +1,15 @@
+databaseChangeLog:
+  # Example changeset for custom type
+  - changeSet:
+      id: c9d0e1f2-a3b4-4c5d-6e7f-8a9b0c1d2e3f
+      author: your.email@company.com
+      context: project_name
+      labels: TICKET-009
+      comment: Create custom type for address
+      changes:
+        - tagDatabase:
+            tag: v1.7.0
+        - sqlFile:
+            path: 08_types\00001_type_example_custom_type.sql
+            endDelimiter:  \nGO
+            stripComments: false

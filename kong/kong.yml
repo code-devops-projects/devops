@@ -1,30 +1,106 @@
 _format_version: "2.1"
 
-consumers:
-  - username: user1
-    custom_id: "12345"
-    tags:
-      - development
-      - auth-service
-    jwt_secrets:
-      - key: com.corhuila.security
-        secret: "roITo2yN5V8W6RbcVJ0GvjKjFbfNgs2DRirmwdpbBTQ48mSudfltuMGxmUCIjYZOIUeBSZqMUcdNRXhYgY8w=="
-
 services:
-  - name: backend_security
-    url: http://backend-security:9000
+  - name: customer_api
+    url: http://mock-customer-api:5000
     routes:
-      - name: security-route-login
+      - name: customer_api_route
         paths:
-          - /access
-        methods:
-          - POST
+          - /api/customer
         strip_path: true
 
-  - name: backend_ubication
-    url: http://backend-ubication:9000
+  - name: security_api
+    url: http://mock-security-api:5000
     routes:
-      - name: ubication-route
+      - name: security_api_route
         paths:
-          - /ubication
+          - /api/security
+        strip_path: true
+
+  - name: inventory_api
+    url: http://mock-inventory-api:5000
+    routes:
+      - name: inventory_api_route
+        paths:
+          - /api/inventory
+        strip_path: true
+
+  - name: invoice_api
+    url: http://mock-invoice-api:9000
+    routes:
+      - name: invoice_api_route
+        paths:
+          - /api/invoice
+        strip_path: true
+
+  - name: customer_portal
+    url: http://mock-customer-portal:80
+    routes:
+      - name: customer_portal_route
+        paths:
+          - /portal/customer
+        strip_path: true
+
+  - name: security_portal
+    url: http://mock-security-portal:80
+    routes:
+      - name: security_portal_route
+        paths:
+          - /portal/security
+        strip_path: true
+
+  - name: inventory_portal
+    url: http://mock-inventory-portal:80
+    routes:
+      - name: inventory_portal_route
+        paths:
+          - /portal/inventory
+        strip_path: true
+
+  - name: invoice_portal
+    url: http://mock-invoice-portal:80
+    routes:
+      - name: invoice_portal_route
+        paths:
+          - /portal/invoice
+        strip_path: true
+
+  - name: customer_app
+    url: http://mock-customer-app:8100
+    routes:
+      - name: customer_app_route
+        paths:
+          - /app/customer
+        strip_path: true
+
+  - name: security_app
+    url: http://mock-security-app:8100
+    routes:
+      - name: security_app_route
+        paths:
+          - /app/security
+        strip_path: true
+
+  - name: inventory_app
+    url: http://mock-inventory-app:8081
+    routes:
+      - name: inventory_app_route
+        paths:
+          - /app/inventory
+        strip_path: true
+
+  - name: invoice_app
+    url: http://mock-invoice-app:9100
+    routes:
+      - name: invoice_app_route
+        paths:
+          - /app/invoice
+        strip_path: true
+
+  - name: fallback_service
+    url: http://mock-fallback:8080
+    routes:
+      - name: fallback_route
+        paths:
+          - /unavailable
         strip_path: true

@@ -1,0 +1,15 @@
+databaseChangeLog:
+  # Example changeset for index
+  - changeSet:
+      id: b8c9d0e1-f2a3-4b4c-5d6e-7f8a9b0c1d2e
+      author: your.email@company.com
+      context: project_name
+      labels: TICKET-008
+      comment: Create index for performance optimization
+      changes:
+        - tagDatabase:
+            tag: v1.6.0
+        - sqlFile:
+            path: 07_indexes\00001_idx_example_index.sql
+            endDelimiter:  \nGO
+            stripComments: false

@@ -1,0 +1,18 @@
+databaseChangeLog:
+  # Example changeset for data update
+  - changeSet:
+      id: e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b
+      author: your.email@company.com
+      context: project_name
+      labels: TICKET-011
+      comment: Update existing configuration values
+      changes:
+        - tagDatabase:
+            tag: v1.9.0
+        - sqlFile:
+            path: 10_updates\00001_update_config_values.sql
+            endDelimiter:  \nGO
+            stripComments: false
+      rollback:
+        - sqlFile:
+            path: 11_rollbacks\10_updates\00001_update_config_values_rollback.sql

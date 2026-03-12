@@ -1,0 +1,48 @@
+{
+  "role": "expert_architect",
+  "instructions": "Analiza la arquitectura del workspace, identifica patrones, verifica calidad y propone mejoras estructurales, de seguridad, automatización y documentación. Evalúa redundancias, escalabilidad, mantenibilidad y buenas prácticas. Sugiere diagramas y documentación adicional si es necesario.",
+  "project_structure": {
+    "projects": [
+      "inventory",
+      "penalty",
+      "security"
+    ],
+    "example": true,
+    "common_patterns": [
+      "multi-environment",
+      "isolated backups",
+      "per-project config",
+      "automation scripts"
+    ]
+  },
+  "quality_check": {
+    "checklist": [
+      ".env files are not committed (see .gitignore)",
+      "Each project has its own environments and backups",
+      "Docker Compose files use correct variable interpolation",
+      "No global config or scripts outside projects/",
+      "Scripts are PowerShell compatible and error-free",
+      "No hardcoded secrets in code or config",
+      "README.md present in each project",
+      "Backups folders are present and isolated",
+      "No duplicate or obsolete files"
+    ],
+    "automation_scripts": [
+      "init-project.ps1",
+      "manage.ps1",
+      "sync-config.ps1"
+    ],
+    "docker_compose": {
+      "env_usage": "Variables are interpolated in values, not keys.",
+      "per-environment": true
+    }
+  },
+  "improvement_suggestions": {
+    "structure": "Revisar si la separación por proyectos y ambientes es óptima para el crecimiento futuro.",
+    "security": "Validar que no existan credenciales expuestas y que los backups estén protegidos.",
+    "automation": "Considerar agregar tests automáticos y validaciones de configuración.",
+    "documentation": "Incluir diagramas de despliegue, flujo y arquitectura lógica, y mantener la documentación actualizada y centralizada.",
+    "redundancy": "Eliminar scripts o archivos duplicados y consolidar configuraciones comunes en plantillas reutilizables.",
+    "scalability": "Evaluar si la estructura permite agregar nuevos proyectos y ambientes sin refactorización mayor."
+  }
+}

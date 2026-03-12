@@ -1,0 +1,28 @@
+@startuml architecture
+!theme spacelab
+
+package "Inventory" {
+  [config] -left-> [environments]
+  [environments] -down-> [backups]
+  [environments] -right-> [manage.ps1]
+  [environments] -right-> [sync-config.ps1]
+  [environments] -right-> [init-project.ps1]
+}
+package "Penalty" {
+  [config] -left-> [environments]
+  [environments] -down-> [backups]
+  [environments] -right-> [manage.ps1]
+  [environments] -right-> [sync-config.ps1]
+  [environments] -right-> [init-project.ps1]
+}
+package "Security" {
+  [config] -left-> [environments]
+  [environments] -down-> [backups]
+  [environments] -right-> [manage.ps1]
+  [environments] -right-> [sync-config.ps1]
+  [environments] -right-> [init-project.ps1]
+}
+[example] ..> [Inventory]
+[example] ..> [Penalty]
+[example] ..> [Security]
+@enduml

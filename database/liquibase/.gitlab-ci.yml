@@ -1,0 +1,97 @@
+# List of stages for jobs and their order of execution.
+stages:
+  - job_validate
+  - job_status
+  - job_update
+
+variables:
+  JDBC: 'postgresql'
+  DRIVER: 'org.postgresql.Driver'
+  STAGE: ''
+  DB_PORT: ''
+  DB_HOST: ''
+  DB_NAME: ''
+  DB_USER: ''
+  DB_PASSWORD: ''
+
+.liquibase_job:
+  before_script:
+    - JDBC=$JDBC;
+    - DRIVER=$DRIVER;
+    - if [ "$CI_COMMIT_BRANCH" = "develop" ]; then
+        STAGE=develop;
+        DB_PORT=$DB_PORT_DEV;
+        DB_HOST=$DB_HOST_DEV;
+        DB_NAME=$DB_NAME_DEV;
+        DB_USER=$DB_USER_DEV;
+        DB_PASSWORD=$DB_PASSWORD_DEV;
+      fi
+    - if [ "$CI_COMMIT_BRANCH" = "qa" ]; then
+        STAGE=qa;
+        DB_PORT=$DB_PORT_QA;
+        DB_HOST=$DB_HOST_QA;
+        DB_NAME=$DB_NAME_QA;
+        DB_USER=$DB_USER_QA;
+        DB_PASSWORD=$DB_PASSWORD_QA;
+      fi
+    - if [ "$CI_COMMIT_BRANCH" = "staging" ]; then
+        STAGE=staging;
+        DB_PORT=$DB_PORT_STAGING;
+        DB_HOST=$DB_HOST_STAGING;
+        DB_NAME=$DB_NAME_STAGING;
+        DB_USER=$DB_USER_STAGING;
+        DB_PASSWORD=$DB_PASSWORD_STAGING;
+      fi
+    - if [ "$CI_COMMIT_BRANCH" = "main" ]; then
+        STAGE=main;
+        DB_PORT=$DB_PORT_PROD;
+        DB_HOST=$DB_HOST_PROD;
+        DB_NAME=$DB_NAME_PROD;
+        DB_USER=$DB_USER_PROD;
+        DB_PASSWORD=$DB_PASSWORD_PROD;
+      fi
+
+# This job runs to validate command to detect if there are any issues with a changelog before running the update command.
+job_validate:
+  tags:
+    - your-runner-tag # Replace with your GitLab runner tag
+  extends: .liquibase_job
+  image: liquibase/liquibase:4.28
+  stage: job_validate
+  rules:
+  - if: '($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "staging")'
+    when: always
+  - if: '($CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "qa")'
+    when: always
+  script:
+    - liquibase --classpath=postgresql-42.3.0.jar --driver=${DRIVER} --url=jdbc:${JDBC}://${DB_HOST}:${DB_PORT}/${DB_NAME} --username=${DB_USER} --password=${DB_PASSWORD} --changeLogFile=changelog.yaml validate
+
+# This job lists all undeployed changesets before running the update command.
+job_status:
+  tags:
+    - your-runner-tag # Replace with your GitLab runner tag
+  extends: .liquibase_job
+  image: liquibase/liquibase:4.28
+  stage: job_status
+  rules:
+  - if: '($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "staging")'
+    when: always
+  - if: '($CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "qa")'
+    when: always
+  script:
+    - liquibase --classpath=postgresql-42.3.0.jar --driver=${DRIVER} --url=jdbc:${JDBC}://${DB_HOST}:${DB_PORT}/${DB_NAME} --username=${DB_USER} --password=${DB_PASSWORD} --changeLogFile=changelog.yaml status
+
+# This job runs to deploy all new changes.
+job_update:
+  tags:
+    - your-runner-tag # Replace with your GitLab runner tag
+  extends: .liquibase_job
+  image: liquibase/liquibase:4.28
+  stage: job_update
+  rules:
+  - if: '($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "staging")'
+    when: manual
+  - if: '($CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "qa")'
+    when: manual
+  script:
+    - liquibase --classpath=postgresql-42.3.0.jar --driver=${DRIVER} --url=jdbc:${JDBC}://${DB_HOST}:${DB_PORT}/${DB_NAME} --username=${DB_USER} --password=${DB_PASSWORD} --changeLogFile=changelog.yaml update
